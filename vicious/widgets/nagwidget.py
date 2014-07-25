@@ -1,7 +1,8 @@
 #!/usr/bin/python2
- 
+
+# Widget Nagios pour awesome.
+
 import urllib2, base64, re
- 
  
 def request(username, password, url):
         req = urllib2.Request(url)
@@ -10,7 +11,7 @@ def request(username, password, url):
         return urllib2.urlopen(req)
  
 def parse(result):
-        warning, critical, unknow = 0, 0, 0
+        warning, critical, unknown = 0, 0, 0
         res = result.read()
         #print res
         match = re.findall(r'<td class=.*>(.*)</td>', res)
@@ -23,15 +24,19 @@ def parse(result):
                         elif (state == "UNKNOWN"):
                                 unknown += 1
  
-        return warning, critical, unknow
+        return warning, critical, unknown
  
- 
+def end(warning, critical, unknown):
+        if (warning == 0 and critical == 0 and unknown == 0):
+            print "<b><span color='green'>Ok! ;)</span>"
+        else:
+            print "<b><span color='yellow'>WARN: %s</span>||<span color='red'>CRIT: %s</span>||<span color='orange'> UNK: %s</span></b>" % (warning, critical, unknown) 
+
 if __name__ == "__main__":
-        username = ""
-        password = ""
-        url = "" 
+        username = 
+        password = 
+        url = 
  
         result = request(username, password, url)
-        warning, critical, unknow = parse(result)
-        print "<b><span color='yellow'>WARNING: %s</span>||<span color='red'>CRITICAL: %s</span>||<span color='orange'> UNKNOWN: %s</span></b>" % (warning, critical, unknow) 
-
+        warning, critical, unknown = parse(result)
+        end(warning, critical, unknown)
