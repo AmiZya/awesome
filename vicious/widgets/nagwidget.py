@@ -28,7 +28,7 @@ def parse(result):
  
 def end(warning, critical, unknown):
         if (warning == 0 and critical == 0 and unknown == 0):
-            print "<b><span color='green'>Ok! ;)</span>"
+            print "<b><span color='green'>Ok! ;)</span></b>"
         else:
             print "<b><span color='yellow'>WARN: %s</span>||<span color='red'>CRIT: %s</span>||<span color='orange'> UNK: %s</span></b>" % (warning, critical, unknown) 
 
