@@ -132,17 +132,12 @@ separator.text  = "|"
 
 mynagios = widget({ type = "textbox" })
 mynagios.text = "  ?  "
-awful.hooks.timer.register(120, function()
-				os.execute("/home/silentd/.config/awesome/vicious/widgets/nagwidget.py > /tmp/nagioschecker")
-				local l = nil
-				local f = io.open("/tmp/nagioschecker")
-				l = f:read()
-				f:close()
-				mynagios.text = l
-end)
--- mymail.timer = timer{timeout=60}
--- mymail.timer:connect_signal("timeout", function () nagios:set_text ( nagios() ) end)
 
+mynagios:buttons(awful.util.table.join(awful.button({ }, 1, function () 
+																															naughty.notify({text = "Refresh in progress..."})
+																															nagios()
+																											end)))
+awful.hooks.timer.register(120, function() nagios() end)
 net2widget = widget({ type = "textbox" })
 -- Register widget
 vicious.register(net2widget, vicious.widgets.net, "<span color='#1793D1'>wlan0: </span><span color='#22FD00'>Up: </span>${wlan0 up_kb}kb/s <span color='#FD0000'>Down: </span>${wlan0 down_kb}kb/s", 1)
@@ -182,6 +177,8 @@ mysystray = widget({ type = "systray" })
 
 -- Create a wibox for each screen and add it
 mywibox = {}
+-- Create seconde wibox
+mywiboxb = {}
 mypromptbox = {}
 mylayoutbox = {}
 mytaglist = {}
@@ -249,10 +246,12 @@ for s = 1, screen.count() do
 		fg = vicious.fg_normal, bg = beautiful.bg_normal,
 		border_color = beautiful.border_focus,
 		--border_width = beautiful.border_width,
-		position = "top",
+		position = "bottom",
 		--height = 20,
 		screen = s
 	})
+    
+
     -- Add widgets to the wibox - order matters
     mywibox[s].widgets = {
         {
@@ -261,7 +260,23 @@ for s = 1, screen.count() do
             mypromptbox[s],
             layout = awful.widget.layout.horizontal.leftright
         },
-        mylayoutbox[s],
+		s == 1 and mysystray or nil,
+        mytasklist[s],
+        layout = awful.widget.layout.horizontal.rightleft
+
+		}
+	  -- Create the wibox n°2
+	mywiboxb[s] = awful.wibox({
+		fg = vicious.fg_normal, bg = beautiful.bg_normal,
+		border_color = beautiful.border_focus,
+		--border_width = beautiful.border_width,
+		position = "top",
+		--height = 20,
+		screen = s
+	})
+
+    mywiboxb[s].widgets = {
+         mylayoutbox[s],
 		mytextclock, separator,
 		batwidget, separator,
 		thermalwidget, separator,
@@ -271,9 +286,10 @@ for s = 1, screen.count() do
 		cpuwidget, separator,
 		mynagios,
 		s == 1 and mysystray or nil,
-        mytasklist[s],
+ --       mytasklist[s],
         layout = awful.widget.layout.horizontal.rightleft
     }
+
 end
 -- }}}
 
@@ -467,3 +483,16 @@ client.add_signal("unfocus", function(c) c.border_color = beautiful.border_norma
 -- }}}
 --
 
+--------------------------------------------------------------------------------------
+--------------------------------- CUSTOM CONFIGURATION -------------------------------
+--------------------------------------------------------------------------------------
+
+-- function for nagios widget.
+function nagios ()
+				os.execute("/home/silentd/.config/awesome/vicious/widgets/nagwidget.py > /tmp/nagioschecker")
+				local l = nil
+				local f = io.open("/tmp/nagioschecker")
+				l = f:read()
+				f:close()
+				mynagios.text = l
+end
