@@ -40,10 +40,10 @@ beautiful.init("/home/silentd/.config/awesome/themes/default/theme.lua")
 
 -- This is used later as the default terminal and editor to run.
 terminal = "gnome-terminal"
+browser = "firefox-bin"
 -- terminal = "xterm"
 editor = os.getenv("EDITOR") or "nano"
 editor_cmd = terminal .. " -e " .. editor
-
 -- Default modkey.
 -- Usually, Mod4 is the key with a logo between Control and Alt.
 -- If you do not like this or do not have such a key,
@@ -120,24 +120,21 @@ separator.text  = "|"
 
 -- {{{ Wibox
 
--- mynagios = widget( nagios() )
--- mynagios.timer = timer{timeout=60}
--- netwidget = widget({ type = "textbox" })
--- Register widget
--- vicious.register(netwidget, vicious.widgets.net, "<span color='#1793D1'>enp3s0u1: </span><span color='#22FD00'>Up: </span>${enp3s0u1 up_kb}kb/s <span color='#FD0000'>Down: </span>${enp3s0u1 down_kb}kb/s", 1)
-
--- function nagios()
--- 	os.execute("/home/silentd/.config/awesome/vicious/widgets/nagwidget.py")
--- end
-
 mynagios = widget({ type = "textbox" })
 mynagios.text = "  ?  "
 
+mynagiosmenu = awful.menu.new({ items = { { "Go Service", browser .. " $NAGIOS_URL " },
+                                        { "open terminal", terminal }
+														            }})
+
 mynagios:buttons(awful.util.table.join(awful.button({ }, 1, function () 
-																															naughty.notify({text = "Refresh in progress..."})
-																															nagios()
-																											end)))
-awful.hooks.timer.register(120, function() nagios() end)
+								naughty.notify({text = "Refresh in progress..."})
+								nagios(1)
+								end),
+								awful.button({ }, 3, function ()
+								nagios()
+				end)))
+awful.hooks.timer.register(120, function() nagios(1) end)
 net2widget = widget({ type = "textbox" })
 -- Register widget
 vicious.register(net2widget, vicious.widgets.net, "<span color='#1793D1'>wlan0: </span><span color='#22FD00'>Up: </span>${wlan0 up_kb}kb/s <span color='#FD0000'>Down: </span>${wlan0 down_kb}kb/s", 1)
@@ -182,6 +179,8 @@ mywiboxb = {}
 mypromptbox = {}
 mylayoutbox = {}
 mytaglist = {}
+mynagioslist = {}
+
 mytaglist.buttons = awful.util.table.join(
                     awful.button({ }, 1, awful.tag.viewonly),
                     awful.button({ modkey }, 1, awful.client.movetotag),
@@ -488,11 +487,15 @@ client.add_signal("unfocus", function(c) c.border_color = beautiful.border_norma
 --------------------------------------------------------------------------------------
 
 -- function for nagios widget.
-function nagios ()
-				os.execute("/home/silentd/.config/awesome/vicious/widgets/nagwidget.py > /tmp/nagioschecker")
-				local l = nil
-				local f = io.open("/tmp/nagioschecker")
-				l = f:read()
-				f:close()
-				mynagios.text = l
+function nagios (c)
+				if c == 1 then
+								os.execute("/home/silentd/.config/awesome/vicious/widgets/nagwidget.py > /tmp/nagioschecker")
+								local l = nil
+								local f = io.open("/tmp/nagioschecker")
+								l = f:read()
+								f:close()
+								mynagios.text = l
+				else
+								mynagiosmenu:toggle()
+				end
 end
